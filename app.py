@@ -17,9 +17,7 @@ def is_color_in_range(image, lower_color, upper_color):
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 st.title("Sistema de Control de Acceso")
-display_clock() 
-
-denied_image_path = "LB.jpeg"
+display_clock()
 
 uploaded_file = st.sidebar.file_uploader("Carga una imagen", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
@@ -33,15 +31,13 @@ if uploaded_file is not None:
     black_upper = np.array([180, 255, 30], np.uint8)
 
     num_faces = len(faces)
-    known_person_detected = False
-
     if num_faces > 0:
+        shirt_black_detected = False
         for (x, y, w, h) in faces:
             shirt_region = img[y+h:y+h+h//2, x:x+w]
             shirt_black = is_color_in_range(shirt_region, black_lower, black_upper)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
             if shirt_black:
-                known_person_detected = True
+                shirt_black_detected = True
                 st.subheader("¡Puedes entrar a la casa!")
                 st.markdown("""
                     **Nombre:** Andrés Julián Múnera Uribe  
@@ -49,17 +45,10 @@ if uploaded_file is not None:
                     **Cédula:** 1001011725  
                     **Profesión:** Estudiante de Diseño Interactivo
                     """, unsafe_allow_html=True)
-                break  # Si se detecta la persona conocida, no es necesario seguir buscando
+                break  # Detener el bucle ya que hemos detectado a la persona con camiseta negra
 
-        if not known_person_detected:
+        if not shirt_black_detected:
             st.image(img, channels="BGR", use_column_width=True)
-            if num_faces == 1:
-                st.subheader("Acceso Permitido")
-                st.write("Una persona detectada.")
-            else:
-                st.subheader("Acceso Permitido")
-                st.write(f"{num_faces} personas detectadas.")
-
             for i in range(num_faces):
                 with st.form(key=f'Form{i}'):
                     st.subheader(f'Información del Invitado {i+1}')
@@ -71,6 +60,8 @@ if uploaded_file is not None:
                     if submitted:
                         st.success('Invitados registrados')
     else:
+        # Si no se detectan rostros, se muestra la imagen de acceso denegado
+        denied_image_path = "LB.jpeg"  # Asegúrate de poner la ruta correcta aquí
         st.subheader("Acceso bloqueado")
         st.write("No se detectaron rostros")
-        st.image(denied_image_path, caption='Acceso Denegado', use_column_width=True)
+        st.image(denied_image_path, use_column_width=True)
