@@ -2,6 +2,15 @@ import streamlit as st
 import cv2
 import numpy as np
 
+def is_color_in_range(image, lower_color, upper_color):
+    # Convertir la imagen a espacio de color HSV
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    # Crear una máscara que identifique los píxeles en el rango de color
+    mask = cv2.inRange(hsv, lower_color, upper_color)
+    # Calcular el porcentaje de píxeles en el rango
+    coverage = np.sum(mask > 0) / mask.size
+    return coverage > 0.2  # Ajustar este umbral según sea necesario
+
 # Cargar el clasificador preentrenado de rostros de OpenCV
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
@@ -16,18 +25,34 @@ if uploaded_file is not None:
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-    # Dibujar rectángulos alrededor de los rostros y mostrar mensajes según la detección
+    # Definir rangos de color para cabello amarillo y camiseta negra en HSV
+    yellow_lower = np.array([20, 100, 100], np.uint8)
+    yellow_upper = np.array([30, 255, 255], np.uint8)
+    black_lower = np.array([0, 0, 0], np.uint8)
+    black_upper = np.array([180, 255, 30], np.uint8)
+
     num_faces = len(faces)
     if num_faces > 0:
+        for (x, y, w, h) in faces:
+            # Análisis de color de cabello y camiseta
+            hair_region = img[max(y - h//3, 0):y, x:x+w]
+            shirt_region = img[y+h:y+h+h//2, x:x+w]
+            hair_yellow = is_color_in_range(hair_region, yellow_lower, yellow_upper)
+            shirt_black = is_color_in_range(shirt_region, black_lower, black_upper)
+
+            # Dibujar rectángulo alrededor del rostro
+            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
+
+            # Mostrar información si se detecta cabello amarillo y camiseta negra
+            if hair_yellow and shirt_black:
+                cv2.putText(img, "Cabello Amarillo, Camiseta Negra", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        
         if num_faces == 1:
             st.subheader("¡Puedes entrar a la casa!")
             st.write("Eres una persona")
         else:
             st.subheader("¡Pueden entrar a la casa!")
             st.write(f"Se detectaron {num_faces} rostros")
-
-        for (x, y, w, h) in faces:
-            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
     else:
         st.subheader("Acceso bloqueado")
         st.write("No se detectaron rostros")
@@ -35,9 +60,6 @@ if uploaded_file is not None:
     # Mostrar el resultado
     st.image(img, channels="BGR", use_column_width=True)
 
-
-    # Mostrar el resultado
-    st.image(img, channels="BGR", use_column_width=True)
 
 
 
