@@ -30,14 +30,9 @@ if uploaded_file is not None:
     black_upper = np.array([180, 255, 30], np.uint8)
 
     num_faces = len(faces)
-    if num_faces > 0:
-        if num_faces == 1:
-            st.subheader("¡Puedes entrar a la casa!")
-            st.write("Eres una persona")
-        else:
-            st.subheader("¡Pueden entrar a la casa!")
-            st.write(f"Se detectaron {num_faces} rostros")
+    known_person_detected = False
 
+    if num_faces > 0:
         for (x, y, w, h) in faces:
             # Análisis de color de camiseta
             shirt_region = img[y+h:y+h+h//2, x:x+w]
@@ -46,19 +41,41 @@ if uploaded_file is not None:
             # Dibujar rectángulo alrededor del rostro
             cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-        st.image(img, channels="BGR", use_column_width=True)
+            # Comprobar si la persona con camiseta negra es conocida
+            if shirt_black:
+                known_person_detected = True
+                st.subheader("¡Puedes entrar a la casa!")
+                st.markdown("""
+                    **Nombre:** Andrés Julián Múnera Uribe  
+                    **Edad:** 23 años  
+                    **Cédula:** 1001011725  
+                    **Profesión:** Estudiante de Diseño Interactivo
+                    """, unsafe_allow_html=True)
+                break  # Salir del bucle ya que se encontró a la persona conocida
 
-        # Crear formularios para cada rostro detectado
-        for i in range(num_faces):
-            with st.form(key=f'Form{i}'):
-                st.subheader(f'Información del Invitado {i+1}')
-                st.text_input("Nombre", value="Andrés Julián Múnera Uribe", key=f'Nombre{i}')
-                st.text_input("Edad", value="23 años", key=f'Edad{i}')
-                st.text_input("Cédula", value="1001011725", key=f'Cedula{i}')
-                st.text_input("Profesión", value="Estudiante de Diseño Interactivo", key=f'Profesion{i}')
-                submitted = st.form_submit_button('Listo')
-                if submitted:
-                    st.success('Invitados registrados')
+        if not known_person_detected:
+            if num_faces == 1:
+                st.subheader("¡Puedes entrar a la casa!")
+                st.write("Eres una persona")
+            else:
+                st.subheader("¡Pueden entrar a la casa!")
+                st.write(f"Se detectaron {num_faces} rostros")
+
+            st.image(img, channels="BGR", use_column_width=True)
+
+            # Crear formularios para cada rostro detectado
+            for i in range(num_faces):
+                with st.form(key=f'Form{i}'):
+                    st.subheader(f'Información del Invitado {i+1}')
+                    st.text_input("Nombre", value="", key=f'Nombre{i}')
+                    st.text_input("Edad", value="", key=f'Edad{i}')
+                    st.text_input("Cédula", value="", key=f'Cedula{i}')
+                    st.text_input("Profesión", value="", key=f'Profesion{i}')
+                    submitted = st.form_submit_button('Listo')
+                    if submitted:
+                        st.success('Invitados registrados')
+        else:
+            st.image(img, channels="BGR", use_column_width=True)
 
     else:
         st.subheader("Acceso bloqueado")
