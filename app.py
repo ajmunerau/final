@@ -22,3 +22,4 @@ if uploaded_file is not None:
 
     # Mostrar el resultado
     st.image(img, channels="BGR", use_column_width=True)
+
