@@ -87,5 +87,7 @@ if uploaded_file is not None:
 
     else:
         st.subheader("Acceso bloqueado")
+        denied_image_path = "LB.jpeg"
+        st.image(denied_image_path, caption='Acceso Denegado', use_column_width=True)
 
 
