@@ -17,14 +17,24 @@ if uploaded_file is not None:
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
     # Dibujar rectángulos alrededor de los rostros y mostrar mensajes según la detección
-    if len(faces) > 0:
-        st.subheader("¡Puedes entrar a la casa!")
-        st.write("Eres una persona")
+    num_faces = len(faces)
+    if num_faces > 0:
+        if num_faces == 1:
+            st.subheader("¡Puedes entrar a la casa!")
+            st.write("Eres una persona")
+        else:
+            st.subheader("¡Pueden entrar a la casa!")
+            st.write(f"Se detectaron {num_faces} rostros")
+
         for (x, y, w, h) in faces:
             cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
     else:
         st.subheader("Acceso bloqueado")
         st.write("No se detectaron rostros")
+
+    # Mostrar el resultado
+    st.image(img, channels="BGR", use_column_width=True)
+
 
     # Mostrar el resultado
     st.image(img, channels="BGR", use_column_width=True)
