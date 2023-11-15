@@ -47,7 +47,12 @@ if uploaded_file is not None:
             st.subheader("¡Puedes entrar a la casa!")
             st.write("Eres una persona")
             if shirt_black:
-                st.write("Andrés Julián Múnera Uribe\n23 años\nCédula 1001011725\nEstudiante de Diseño Interactivo")
+                st.markdown("""
+                    **Nombre:** Andrés Julián Múnera Uribe  
+                    **Edad:** 23 años  
+                    **Cédula:** 1001011725  
+                    **Profesión:** Estudiante de Diseño Interactivo
+                    """, unsafe_allow_html=True)
         else:
             st.subheader("¡Pueden entrar a la casa!")
             st.write(f"Se detectaron {num_faces} rostros")
@@ -57,3 +62,4 @@ if uploaded_file is not None:
 
     # Mostrar el resultado
     st.image(img, channels="BGR", use_column_width=True)
+
