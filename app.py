@@ -31,6 +31,13 @@ if uploaded_file is not None:
 
     num_faces = len(faces)
     if num_faces > 0:
+        if num_faces == 1:
+            st.subheader("¡Puedes entrar a la casa!")
+            st.write("Eres una persona")
+        else:
+            st.subheader("¡Pueden entrar a la casa!")
+            st.write(f"Se detectaron {num_faces} rostros")
+
         for (x, y, w, h) in faces:
             # Análisis de color de camiseta
             shirt_region = img[y+h:y+h+h//2, x:x+w]
@@ -38,10 +45,6 @@ if uploaded_file is not None:
 
             # Dibujar rectángulo alrededor del rostro
             cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-
-            # Mostrar información si se detecta camiseta negra
-            if shirt_black:
-                cv2.putText(img, "Camiseta Negra Detectada", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
         st.image(img, channels="BGR", use_column_width=True)
 
@@ -60,5 +63,3 @@ if uploaded_file is not None:
     else:
         st.subheader("Acceso bloqueado")
         st.write("No se detectaron rostros")
-
-
