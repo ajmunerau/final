@@ -14,7 +14,7 @@ if uploaded_file is not None:
 
     # Detectar rostros
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
     # Dibujar rectángulos alrededor de los rostros y mostrar mensajes según la detección
     if len(faces) > 0:
@@ -28,5 +28,6 @@ if uploaded_file is not None:
 
     # Mostrar el resultado
     st.image(img, channels="BGR", use_column_width=True)
+
 
 
