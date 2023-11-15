@@ -3,26 +3,27 @@ import cv2
 import numpy as np
 from datetime import datetime
 
+# Función para mostrar la hora actual
 def display_clock():
-    # Mostrar la hora actual
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     st.sidebar.markdown(f'#### ⏰ Hora Actual: {current_time}')
 
+# Función para determinar si el color está en el rango especificado
 def is_color_in_range(image, lower_color, upper_color):
-    # Convertir la imagen a espacio de color HSV
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    # Crear una máscara que identifique los píxeles en el rango de color
     mask = cv2.inRange(hsv, lower_color, upper_color)
-    # Calcular el porcentaje de píxeles en el rango
     coverage = np.sum(mask > 0) / mask.size
-    return coverage > 0.2  # Ajustar este umbral según sea necesario
+    return coverage > 0.2
 
-# Cargar el clasificador preentrenado de rostros de OpenCV
+# Cargar clasificador preentrenado de OpenCV
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 st.title("Sistema de Control de Acceso")
 display_clock()  # Mostrar el reloj
+
+# Ruta al archivo de la imagen de acceso denegado
+denied_image_path = "LB.jpeg"
 
 uploaded_file = st.sidebar.file_uploader("Carga una imagen", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
@@ -33,7 +34,7 @@ if uploaded_file is not None:
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-    # Definir rangos de color para camiseta negra en HSV
+    # Definir rangos de color HSV para negro
     black_lower = np.array([0, 0, 0], np.uint8)
     black_upper = np.array([180, 255, 30], np.uint8)
 
@@ -42,14 +43,9 @@ if uploaded_file is not None:
 
     if num_faces > 0:
         for (x, y, w, h) in faces:
-            # Análisis de color de camiseta
             shirt_region = img[y+h:y+h+h//2, x:x+w]
             shirt_black = is_color_in_range(shirt_region, black_lower, black_upper)
-
-            # Dibujar rectángulo alrededor del rostro
             cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-
-            # Comprobar si la persona con camiseta negra es conocida
             if shirt_black:
                 known_person_detected = True
                 st.subheader("¡Puedes entrar a la casa!")
@@ -59,7 +55,7 @@ if uploaded_file is not None:
                     **Cédula:** 1001011725  
                     **Profesión:** Estudiante de Diseño Interactivo
                     """, unsafe_allow_html=True)
-                break  # Salir del bucle ya que se encontró a la persona conocida
+                break  # Si se detecta la persona conocida, no es necesario seguir buscando
 
         if not known_person_detected:
             if num_faces == 1:
@@ -71,21 +67,16 @@ if uploaded_file is not None:
 
             st.image(img, channels="BGR", use_column_width=True)
 
-            # Crear formularios para cada rostro detectado
             for i in range(num_faces):
                 with st.form(key=f'Form{i}'):
                     st.subheader(f'Información del Invitado {i+1}')
-                    st.text_input("Nombre", value="", key=f'Nombre{i}')
-                    st.text_input("Edad", value="", key=f'Edad{i}')
-                    st.text_input("Cédula", value="", key=f'Cedula{i}')
-                    st.text_input("Profesión", value="", key=f'Profesion{i}')
+                    st.text_input("Nombre", key=f'Nombre{i}')
+                    st.text_input("Edad", key=f'Edad{i}')
+                    st.text_input("Cédula", key=f'Cedula{i}')
+                    st.text_input("Profesión", key=f'Profesion{i}')
                     submitted = st.form_submit_button('Listo')
                     if submitted:
                         st.success('Invitados registrados')
-        else:
-            st.image(img, channels="BGR", use_column_width=True)
-
     else:
-        st.subheader("Acceso bloqueado")
-
-
+        # Si el acceso está bloqueado, se muestra la imagen de acceso denegado
+        st.image(denied_image_path, caption='Acceso Denegado', use_column_width=True)
