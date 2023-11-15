@@ -86,6 +86,6 @@ if uploaded_file is not None:
             st.image(img, channels="BGR", use_column_width=True)
 
     else:
-        st.subheader("Acceso bloqueado
+        st.subheader("Acceso bloqueado")
 
 
