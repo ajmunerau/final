@@ -23,7 +23,7 @@ st.title("Sistema de Control de Acceso")
 display_clock()  # Mostrar el reloj
 
 # Ruta al archivo de la imagen de acceso denegado
-denied_image_path = "LB.jpeg"
+denied_image_path = "ruta/a/la/imagen/WhatsApp Image 2023-11-15 at 6.09.37 PM.jpeg"
 
 uploaded_file = st.sidebar.file_uploader("Carga una imagen", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
@@ -57,16 +57,17 @@ if uploaded_file is not None:
                     """, unsafe_allow_html=True)
                 break  # Si se detecta la persona conocida, no es necesario seguir buscando
 
+        # Si no se reconoce a la persona con camiseta negra, mostrar la imagen y los formularios
         if not known_person_detected:
-            if num_faces == 1:
-                st.subheader("¡Puedes entrar a la casa!")
-                st.write("Eres una persona")
-            else:
-                st.subheader("¡Pueden entrar a la casa!")
-                st.write(f"Se detectaron {num_faces} rostros")
-
             st.image(img, channels="BGR", use_column_width=True)
+            if num_faces == 1:
+                st.subheader("Acceso Permitido")
+                st.write("Una persona detectada.")
+            else:
+                st.subheader("Acceso Permitido")
+                st.write(f"{num_faces} personas detectadas.")
 
+            # Crear formularios para cada rostro detectado
             for i in range(num_faces):
                 with st.form(key=f'Form{i}'):
                     st.subheader(f'Información del Invitado {i+1}')
@@ -78,5 +79,8 @@ if uploaded_file is not None:
                     if submitted:
                         st.success('Invitados registrados')
     else:
-        # Si el acceso está bloqueado, se muestra la imagen de acceso denegado
+       
+ # Si no se detectan rostros, mostrar imagen de acceso denegado
+        st.subheader("Acceso bloqueado")
+        st.write("No se detectaron rostros")
         st.image(denied_image_path, caption='Acceso Denegado', use_column_width=True)
