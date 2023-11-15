@@ -42,24 +42,23 @@ if uploaded_file is not None:
             # Mostrar información si se detecta camiseta negra
             if shirt_black:
                 cv2.putText(img, "Camiseta Negra Detectada", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        
-        if num_faces == 1:
-            st.subheader("¡Puedes entrar a la casa!")
-            st.write("Eres una persona")
-            if shirt_black:
-                st.markdown("""
-                    **Nombre:** Andrés Julián Múnera Uribe  
-                    **Edad:** 23 años  
-                    **Cédula:** 1001011725  
-                    **Profesión:** Estudiante de Diseño Interactivo
-                    """, unsafe_allow_html=True)
-        else:
-            st.subheader("¡Pueden entrar a la casa!")
-            st.write(f"Se detectaron {num_faces} rostros")
+
+        st.image(img, channels="BGR", use_column_width=True)
+
+        # Crear formularios para cada rostro detectado
+        for i in range(num_faces):
+            with st.form(key=f'Form{i}'):
+                st.subheader(f'Información del Invitado {i+1}')
+                st.text_input("Nombre", value="Andrés Julián Múnera Uribe", key=f'Nombre{i}')
+                st.text_input("Edad", value="23 años", key=f'Edad{i}')
+                st.text_input("Cédula", value="1001011725", key=f'Cedula{i}')
+                st.text_input("Profesión", value="Estudiante de Diseño Interactivo", key=f'Profesion{i}')
+                submitted = st.form_submit_button('Listo')
+                if submitted:
+                    st.success('Invitados registrados')
+
     else:
         st.subheader("Acceso bloqueado")
         st.write("No se detectaron rostros")
 
-    # Mostrar el resultado
-    st.image(img, channels="BGR", use_column_width=True)
 
